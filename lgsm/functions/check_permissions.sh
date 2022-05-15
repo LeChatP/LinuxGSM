@@ -9,35 +9,35 @@ functionselfname="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"
 
 fn_check_ownership(){
 	if [ -f "${rootdir}/${selfname}" ]; then
-		if [ "$(find "${rootdir}/${selfname}" -not -user "$(whoami)" | wc -l)" -ne "0" ]; then
+		if [ "$(find "${rootdir}/${selfname}" -user "root" | wc -l)" -ne "0" ]; then
 			selfownissue=1
 		fi
 	fi
 	if [ -d "${functionsdir}" ]; then
-		if [ "$(find "${functionsdir}" -not -user "$(whoami)" | wc -l)" -ne "0" ]; then
+		if [ "$(find "${functionsdir}" -user "root" | wc -l)" -ne "0" ]; then
 			funcownissue=1
 		fi
 	fi
 	if [ -d "${serverfiles}" ]; then
-		if [ "$(find "${serverfiles}" -not -user "$(whoami)" | wc -l)" -ne "0" ]; then
+		if [ "$(find "${serverfiles}" -user "root" | wc -l)" -ne "0" ]; then
 			filesownissue=1
 		fi
 	fi
 	if [ "${selfownissue}" == "1" ]||[ "${funcownissue}" == "1" ]||[ "${filesownissue}" == "1" ]; then
 		fn_print_fail_nl "Ownership issues found"
 		fn_script_log_fatal "Ownership issues found"
-		fn_print_information_nl "The current user ($(whoami)) does not have ownership of the following files:"
-		fn_script_log_info "The current user ($(whoami)) does not have ownership of the following files:"
+		fn_print_information_nl "The following files are owned by root:"
+		fn_script_log_info "The following files are owned by root:"
 		{
 			echo -e "User\tGroup\tFile\n"
 			if [ "${selfownissue}" == "1" ]; then
-				find "${rootdir}/${selfname}" -not -user "$(whoami)" -printf "%u\t%g\t%p\n"
+				find "${rootdir}/${selfname}" -user "root" -printf "%u\t%g\t%p\n"
 			fi
 			if [ "${funcownissue}" == "1" ]; then
-				find "${functionsdir}" -not -user "$(whoami)" -printf "%u\t%g\t%p\n"
+				find "${functionsdir}" -user "root" -printf "%u\t%g\t%p\n"
 			fi
 			if [ "${filesownissue}" == "1"  ]; then
-				find "${serverfiles}" -not -user "$(whoami)" -printf "%u\t%g\t%p\n"
+				find "${serverfiles}" -user "root" -printf "%u\t%g\t%p\n"
 			fi
 
 		} | column -s $'\t' -t | tee -a "${lgsmlog}"
